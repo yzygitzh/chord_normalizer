@@ -292,3 +292,10 @@ let rec typeof ctx t =
   | TmIsZero(fi,t1) ->
       if tyeqv ctx (typeof ctx t1) TyNat then TyBool
       else error fi "argument of iszero is not a number"
+  (* @yzy for chord normalizer *)
+  | TmNote(fi,ty,seq,height,len) ->
+      (match ty with
+          "chord" -> TyChord
+        | "brokenchord" -> TyBrokenChord 
+        | "melody" -> TyMelody
+        | _ -> error fi "invalid note type" )

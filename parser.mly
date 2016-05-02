@@ -97,6 +97,9 @@ open Syntax
 %token <Support.Error.info> TRIANGLE
 %token <Support.Error.info> USCORE
 %token <Support.Error.info> VBAR
+/* @yzy for chord normalizer */
+%token <Support.Error.info> LCURLYHASH
+%token <Support.Error.info> HASHRCURLY
 
 /* ---------------------------------------------------------------------- */
 /* The starting production of the generated parser is the syntactic class
@@ -311,6 +314,9 @@ ATerm :
   | LCURLY Fields RCURLY
       { fun ctx ->
           TmRecord($1, $2 ctx 1) }
+    /* @yzy for chord normalizer */
+  | LCURLYHASH STRINGV VBAR STRINGV VBAR STRINGV VBAR INTV HASHRCURLY
+      { fun ctx -> TmNote($1, $2.v, $4.v, $6.v, $8.v) }
   | FLOATV
       { fun ctx -> TmFloat($1.i, $1.v) }
   | INTV

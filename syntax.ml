@@ -44,6 +44,8 @@ type term =
   | TmPred of info * term
   | TmIsZero of info * term
   | TmInert of info * ty
+  (* @yzy for chord normalizer *)
+  | TmNote of info * string * string * string * int
 
 type binding =
     NameBind 
@@ -146,6 +148,8 @@ let tmmap onvar ontype c t =
       TmCase(fi, walk c t,
              List.map (fun (li,(xi,ti)) -> (li, (xi,walk (c+1) ti)))
                cases)
+  (* @yzy for chord normalizer *)
+  | TmNote _ as t -> t
   in walk c t
 
 let typeShiftAbove d c tyT =
@@ -249,6 +253,8 @@ let tmInfo t = match t with
   | TmSucc(fi,_) -> fi
   | TmPred(fi,_) -> fi
   | TmIsZero(fi,_) -> fi 
+  (* @yzy for chord normalizer *)
+  | TmNote(fi,_,_,_,_) -> fi
 
 (* ---------------------------------------------------------------------- *)
 (* Printing *)
@@ -451,6 +457,8 @@ and printtm_ATerm outer ctx t = match t with
        | TmSucc(_,s) -> f (n+1) s
        | _ -> (pr "(succ "; printtm_ATerm false ctx t1; pr ")")
      in f 1 t1
+  (* @yzy for chord normalizer *)
+  | TmNote(_) -> pr "todo: print note term"
   | t -> pr "("; printtm_Term outer ctx t; pr ")"
 
 let printtm ctx t = printtm_Term true ctx t 

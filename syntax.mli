@@ -43,6 +43,8 @@ type term =
   | TmPred of info * term
   | TmIsZero of info * term
   | TmInert of info * ty
+  (* @yzy for chord normalizer *)
+  | TmNote of info * string * string * string * int
 
 type binding =
     NameBind 

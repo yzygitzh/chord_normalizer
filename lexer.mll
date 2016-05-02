@@ -72,6 +72,9 @@ let reservedWords = [
   ("|}", fun i -> Parser.BARRCURLY i);
   ("|>", fun i -> Parser.BARGT i);
   ("|]", fun i -> Parser.BARRSQUARE i);
+  (* @yzy for chord normalizer *)
+  ("{#", fun i -> Parser.LCURLYHASH i);
+  ("#}", fun i -> Parser.HASHRCURLY i);
 
   (* Special compound symbols: *)
   (":=", fun i -> Parser.COLONEQ i);
@@ -173,6 +176,8 @@ rule main = parse
 
 | ":=" | "<:" | "<-" | "->" | "=>" | "==>"
 | "{|" | "|}" | "<|" | "|>" | "[|" | "|]" | "=="
+(* @yzy for chord normalizer *)
+| "{#" | "#}"
     { createID (info lexbuf) (text lexbuf) }
 
 | ['~' '%' '\\' '+' '-' '&' '|' ':' '@' '`' '$']+
