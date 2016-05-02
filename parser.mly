@@ -51,6 +51,7 @@ open Syntax
 %token <Support.Error.info> CHORD
 %token <Support.Error.info> BROKENCHORD
 %token <Support.Error.info> MELODY
+%token <Support.Error.info> NOTESET
 
 /* Identifier and constant value tokens */
 %token <string Support.Error.withinfo> UCID  /* uppercase-initial */
@@ -189,6 +190,8 @@ AType :
       { fun ctx -> TyBrokenChord }
   | MELODY
       { fun ctx -> TyMelody }
+  | NOTESET
+      { fun ctx -> TyNoteset }
 
 TyBinder :
     /* empty */
@@ -267,6 +270,9 @@ AppTerm :
       { fun ctx -> TmPred($1, $2 ctx) }
   | ISZERO PathTerm
       { fun ctx -> TmIsZero($1, $2 ctx) }
+  /* @yzy for chord normalizer */
+  | NOTESET PathTerm PathTerm
+      { fun ctx -> TmNoteset($1, $2 ctx, $3 ctx) }
 
 AscribeTerm :
     ATerm AS Type

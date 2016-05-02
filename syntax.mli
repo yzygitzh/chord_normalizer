@@ -19,6 +19,7 @@ type ty =
   | TyChord
   | TyBrokenChord
   | TyMelody
+  | TyNoteset
 
 type term =
     TmTrue of info
@@ -45,6 +46,7 @@ type term =
   | TmInert of info * ty
   (* @yzy for chord normalizer *)
   | TmNote of info * string * string * string * int
+  | TmNoteset of info * term * term
 
 type binding =
     NameBind 

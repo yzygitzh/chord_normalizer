@@ -20,6 +20,7 @@ type ty =
   | TyChord
   | TyBrokenChord
   | TyMelody
+  | TyNoteset
 
 type term =
     TmTrue of info
@@ -46,6 +47,7 @@ type term =
   | TmInert of info * ty
   (* @yzy for chord normalizer *)
   | TmNote of info * string * string * string * int
+  | TmNoteset of info * term * term
 
 type binding =
     NameBind 
@@ -115,6 +117,7 @@ let tymap onvar c tyT =
   | TyChord -> TyChord
   | TyBrokenChord -> TyBrokenChord
   | TyMelody -> TyMelody
+  | TyNoteset -> TyNoteset
   | TyArr(tyT1,tyT2) -> TyArr(walk c tyT1,walk c tyT2)
   | TyVariant(fieldtys) -> TyVariant(List.map (fun (li,tyTi) -> (li, walk c tyTi)) fieldtys)
   in walk c tyT
@@ -150,6 +153,7 @@ let tmmap onvar ontype c t =
                cases)
   (* @yzy for chord normalizer *)
   | TmNote _ as t -> t
+  | TmNoteset(fi,t1,t2) -> TmNoteset(fi, walk c t1, walk c t2)
   in walk c t
 
 let typeShiftAbove d c tyT =
@@ -255,6 +259,7 @@ let tmInfo t = match t with
   | TmIsZero(fi,_) -> fi 
   (* @yzy for chord normalizer *)
   | TmNote(fi,_,_,_,_) -> fi
+  | TmNoteset(fi,_,_) -> fi
 
 (* ---------------------------------------------------------------------- *)
 (* Printing *)
@@ -337,6 +342,7 @@ and printty_AType outer ctx tyT = match tyT with
   | TyChord -> pr "Chord (todo: nicer type printing)"
   | TyBrokenChord -> pr "BrokenChord (todo: nicer type printing)"
   | TyMelody -> pr "Melody (todo: nicer type printing)"
+  | TyNoteset -> pr "Noteset (todo: nicer type printing)"
   | tyT -> pr "("; printty_Type outer ctx tyT; pr ")"
 
 let printty ctx tyT = printty_Type true ctx tyT 
@@ -459,6 +465,7 @@ and printtm_ATerm outer ctx t = match t with
      in f 1 t1
   (* @yzy for chord normalizer *)
   | TmNote(_) -> pr "todo: print note term"
+  | TmNoteset(_) -> pr "todo: print noteset term"
   | t -> pr "("; printtm_Term outer ctx t; pr ")"
 
 let printtm ctx t = printtm_Term true ctx t 

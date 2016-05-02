@@ -40,6 +40,7 @@ let reservedWords = [
   ("Chord", fun i -> Parser.CHORD i);
   ("BrokenChord", fun i -> Parser.BROKENCHORD i);
   ("Melody", fun i -> Parser.MELODY i);
+  ("Noteset", fun i -> Parser.NOTESET i);
   
   (* Symbols *)
   ("_", fun i -> Parser.USCORE i);

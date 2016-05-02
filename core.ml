@@ -22,6 +22,9 @@ let rec isval ctx t = match t with
   | t when isnumericval ctx t  -> true
   | TmAbs(_,_,_,_) -> true
   | TmRecord(_,fields) -> List.for_all (fun (l,ti) -> isval ctx ti) fields
+  (* @yzy for chord normalizer *)
+  | TmNote(_,_,_,_,_) -> true
+  | TmNoteset(_,_,_) -> true
   | _ -> false
 
 let rec eval1 ctx t = match t with
@@ -299,3 +302,13 @@ let rec typeof ctx t =
         | "brokenchord" -> TyBrokenChord 
         | "melody" -> TyMelody
         | _ -> error fi "invalid note type" )
+  | TmNoteset(fi,t1,t2) ->
+      let typet1 = typeof ctx t1 in
+      (match typet1 with
+          TyChord | TyBrokenChord | TyMelody| TyNoteset -> (
+            let typet2 = typeof ctx t2 in
+            (match typet2 with
+                TyChord | TyBrokenChord | TyMelody| TyNoteset -> TyNoteset
+              | _ -> error fi "invalid noteset constructor #2" )
+          )
+        | _ -> error fi "invalid noteset constructor #1" )
