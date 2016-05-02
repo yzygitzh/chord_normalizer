@@ -15,6 +15,10 @@ type ty =
   | TyString
   | TyFloat
   | TyNat
+  (* @yzy for chord normalizer *)
+  | TyChord
+  | TyBrokenChord
+  | TyMelody
 
 type term =
     TmTrue of info

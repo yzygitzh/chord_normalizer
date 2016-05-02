@@ -47,6 +47,10 @@ open Syntax
 %token <Support.Error.info> PRED
 %token <Support.Error.info> ISZERO
 %token <Support.Error.info> NAT
+/* @yzy for chord normalizer */
+%token <Support.Error.info> CHORD
+%token <Support.Error.info> BROKENCHORD
+%token <Support.Error.info> MELODY
 
 /* Identifier and constant value tokens */
 %token <string Support.Error.withinfo> UCID  /* uppercase-initial */
@@ -175,6 +179,13 @@ AType :
       { fun ctx -> TyFloat }
   | NAT
       { fun ctx -> TyNat }
+    /* @yzy for chord normalizer */
+  | CHORD
+      { fun ctx -> TyChord }
+  | BROKENCHORD
+      { fun ctx -> TyBrokenChord }
+  | MELODY
+      { fun ctx -> TyMelody }
 
 TyBinder :
     /* empty */

@@ -16,6 +16,10 @@ type ty =
   | TyString
   | TyFloat
   | TyNat
+  (* @yzy for chord normalizer *)
+  | TyChord
+  | TyBrokenChord
+  | TyMelody
 
 type term =
     TmTrue of info
@@ -105,6 +109,10 @@ let tymap onvar c tyT =
   | TyFloat -> TyFloat
   | TyBool -> TyBool
   | TyNat -> TyNat
+  (* @yzy for chord normalizer *)
+  | TyChord -> TyChord
+  | TyBrokenChord -> TyBrokenChord
+  | TyMelody -> TyMelody
   | TyArr(tyT1,tyT2) -> TyArr(walk c tyT1,walk c tyT2)
   | TyVariant(fieldtys) -> TyVariant(List.map (fun (li,tyTi) -> (li, walk c tyTi)) fieldtys)
   in walk c tyT
@@ -319,6 +327,10 @@ and printty_AType outer ctx tyT = match tyT with
         in pr "{"; open_hovbox 0; p 1 fields; pr "}"; cbox()
   | TyFloat -> pr "Float"
   | TyNat -> pr "Nat"
+  (* @yzy for chord normalizer *)
+  | TyChord -> pr "Chord (todo: nicer type printing)"
+  | TyBrokenChord -> pr "BrokenChord (todo: nicer type printing)"
+  | TyMelody -> pr "Melody (todo: nicer type printing)"
   | tyT -> pr "("; printty_Type outer ctx tyT; pr ")"
 
 let printty ctx tyT = printty_Type true ctx tyT 
