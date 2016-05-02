@@ -12,3 +12,6 @@ let y = (Noteset
 			{#"melody"|"test2"|"test3"|3#} 
 			{#"melody"|"test2"|"test3"|3#}) in
 		(Noteset x y);
+
+T = Note -> Note;	
+lambda f:T. lambda x:Note. f (f x);

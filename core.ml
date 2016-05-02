@@ -183,6 +183,9 @@ let rec tyeqv ctx tyS tyT =
             (fun (li1,tyTi1) (li2,tyTi2) ->
                (li1=li2) && tyeqv ctx tyTi1 tyTi2)
             fields1 fields2
+  (* @yzy for chord normalizer *)
+  | (TyNote,TyNote) -> true
+  | (TyNoteset,TyNoteset) -> true
   | _ -> false
 
 (* ------------------------   TYPING  ------------------------ *)
