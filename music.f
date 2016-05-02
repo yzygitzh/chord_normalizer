@@ -1,7 +1,7 @@
 /* Examples for music testing */
-/*let x = {#"chord"|"test2"|"test3"|3#} in x;
+let x = {#"chord"|"test2"|"test3"|3#} in x;
 {#"brokenchord"|"test2"|"test3"|3#};
-{#"melody"|"test2"|"test3"|3#};*/
+{#"melody"|"test2"|"test3"|3#};
 
 Noteset {#"melody"|"test2"|"test3"|3#} {#"melody"|"test2"|"test3"|3#};
 

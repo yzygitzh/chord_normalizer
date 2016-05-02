@@ -16,9 +16,7 @@ type ty =
   | TyFloat
   | TyNat
   (* @yzy for chord normalizer *)
-  | TyChord
-  | TyBrokenChord
-  | TyMelody
+  | TyNote
   | TyNoteset
 
 type term =

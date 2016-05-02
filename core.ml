@@ -298,17 +298,15 @@ let rec typeof ctx t =
   (* @yzy for chord normalizer *)
   | TmNote(fi,ty,seq,height,len) ->
       (match ty with
-          "chord" -> TyChord
-        | "brokenchord" -> TyBrokenChord 
-        | "melody" -> TyMelody
-        | _ -> error fi "invalid note type" )
+          "chord" | "brokenchord" | "melody" -> TyNote
+        | _ -> error fi "invalid note type; a note must be a chord / brokenchord / melody")
   | TmNoteset(fi,t1,t2) ->
       let typet1 = typeof ctx t1 in
       (match typet1 with
-          TyChord | TyBrokenChord | TyMelody| TyNoteset -> (
+          TyNote | TyNoteset -> (
             let typet2 = typeof ctx t2 in
             (match typet2 with
-                TyChord | TyBrokenChord | TyMelody| TyNoteset -> TyNoteset
-              | _ -> error fi "invalid noteset constructor #2" )
+                TyNote | TyNoteset -> TyNoteset
+              | _ -> error fi "invalid noteset constructor #2")
           )
-        | _ -> error fi "invalid noteset constructor #1" )
+        | _ -> error fi "invalid noteset constructor #1")

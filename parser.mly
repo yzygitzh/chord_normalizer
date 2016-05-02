@@ -48,9 +48,7 @@ open Syntax
 %token <Support.Error.info> ISZERO
 %token <Support.Error.info> NAT
 /* @yzy for chord normalizer */
-%token <Support.Error.info> CHORD
-%token <Support.Error.info> BROKENCHORD
-%token <Support.Error.info> MELODY
+%token <Support.Error.info> NOTE
 %token <Support.Error.info> NOTESET
 
 /* Identifier and constant value tokens */
@@ -184,12 +182,8 @@ AType :
   | NAT
       { fun ctx -> TyNat }
     /* @yzy for chord normalizer */
-  | CHORD
-      { fun ctx -> TyChord }
-  | BROKENCHORD
-      { fun ctx -> TyBrokenChord }
-  | MELODY
-      { fun ctx -> TyMelody }
+  | NOTE
+      { fun ctx -> TyNote }
   | NOTESET
       { fun ctx -> TyNoteset }
 

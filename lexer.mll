@@ -37,9 +37,7 @@ let reservedWords = [
   ("iszero", fun i -> Parser.ISZERO i);
   ("Nat", fun i -> Parser.NAT i);
   (* @yzy for chord normalizer *)
-  ("Chord", fun i -> Parser.CHORD i);
-  ("BrokenChord", fun i -> Parser.BROKENCHORD i);
-  ("Melody", fun i -> Parser.MELODY i);
+  ("Note", fun i -> Parser.NOTE i);
   ("Noteset", fun i -> Parser.NOTESET i);
   
   (* Symbols *)

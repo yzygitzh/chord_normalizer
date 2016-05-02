@@ -17,9 +17,7 @@ type ty =
   | TyFloat
   | TyNat
   (* @yzy for chord normalizer *)
-  | TyChord
-  | TyBrokenChord
-  | TyMelody
+  | TyNote
   | TyNoteset
 
 type term =
@@ -114,9 +112,7 @@ let tymap onvar c tyT =
   | TyBool -> TyBool
   | TyNat -> TyNat
   (* @yzy for chord normalizer *)
-  | TyChord -> TyChord
-  | TyBrokenChord -> TyBrokenChord
-  | TyMelody -> TyMelody
+  | TyNote -> TyNote
   | TyNoteset -> TyNoteset
   | TyArr(tyT1,tyT2) -> TyArr(walk c tyT1,walk c tyT2)
   | TyVariant(fieldtys) -> TyVariant(List.map (fun (li,tyTi) -> (li, walk c tyTi)) fieldtys)
@@ -339,9 +335,7 @@ and printty_AType outer ctx tyT = match tyT with
   | TyFloat -> pr "Float"
   | TyNat -> pr "Nat"
   (* @yzy for chord normalizer *)
-  | TyChord -> pr "Chord (todo: nicer type printing)"
-  | TyBrokenChord -> pr "BrokenChord (todo: nicer type printing)"
-  | TyMelody -> pr "Melody (todo: nicer type printing)"
+  | TyNote -> pr "Note (todo: nicer type printing)"
   | TyNoteset -> pr "Noteset (todo: nicer type printing)"
   | tyT -> pr "("; printty_Type outer ctx tyT; pr ")"
 
