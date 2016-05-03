@@ -446,9 +446,9 @@ let rec typeof ctx t =
       let typet1 = typeof ctx t1 in 
       let typet2 = typeof ctx t2 in (
         match typet1 with 
-          TySegment(_) -> (
+          TySegment(_) | TyPassage -> (
             match typet2 with
-              TySegment(_) -> TyPassage
+              TySegment(_) | TyPassage -> TyPassage
             | _ -> error fi "invalid passage constructor #2"
           )
         | _ -> error fi "invalid passage constructor #1"

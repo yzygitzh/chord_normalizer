@@ -3,7 +3,8 @@ x = {#"chord"|"641"|"135"|3#};
 y = {#"brokenchord"|"641"|"135"|3#};
 z = {#"melody"|"135"|"135"|3#};
 
-MakeSegment (MakePhrase z (MakePhrase (MakeNoteset x y) z))(3,"harmony","major");
+s = MakeSegment (MakePhrase z (MakePhrase (MakeNoteset x y) z))(3,"harmony","major");
+p = MakePassage s s;
 
 let x = (MakeNoteset
 			{#"chord"|"135"|"135"|3#} 
