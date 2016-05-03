@@ -377,57 +377,34 @@ let rec typeof ctx t =
       )
   | TmPhrase(fi,t1,t2) -> 
       let typet1 = typeof ctx t1 in 
-      let typet2 = typeof ctx t2 in (
-        match typet1 with
+      let typet2 = typeof ctx t2 in 
+      let rank1 = ref 0 in
+      let rank2 = ref 0 in
+      let rank3 = ref 0 in (
+        (match typet1 with
             TyNote(nr1) | TyNoteset(nr1) -> (
-              match typet2 with
-                  TyNote(nr2) | TyNoteset(nr2) -> (
-                    if ((nr1 == 1 && nr2 == 4) || 
-                        (nr1 == 1 && nr2 == 5) || 
-                        (nr1 == 4 && nr2 == 1) ||
-                        (nr1 == 5 && nr2 == 1) || 
-                        (nr1 == 4 && nr2 == 5) ||
-                        (nr1 == nr2))
-                    then TyPhrase(nr1,nr2)
-                    else error fi "Phrase constructors' rank mismatch"
-                  )
-                | TyPhrase(pr21,pr22) -> (
-                    if ((nr1 == 1 && pr21 == 4) || 
-                        (nr1 == 1 && pr21 == 5) || 
-                        (nr1 == 4 && pr21 == 1) ||
-                        (nr1 == 5 && pr21 == 1) || 
-                        (nr1 == 4 && pr21 == 5) ||
-                        (nr1 == pr21))
-                    then TyPhrase(nr1,pr22)
-                    else error fi "Phrase constructors' rank mismatch"
-                  )
-                | _ -> error fi "invalid phrase constructor #2"
+              rank1 := nr1;
+              (match typet2 with
+                  TyNote(nr2) | TyNoteset(nr2) -> rank2 := nr2; rank3 := nr2;
+                | TyPhrase(pr21,pr22) -> rank2 := pr21; rank3 := pr22;
+                | _ -> error fi "invalid phrase constructor #2")
             )
           | TyPhrase(pr11,pr12) -> (
-              match typet2 with
-                  TyNote(nr2) | TyNoteset(nr2) -> (
-                    if ((pr12 == 1 && nr2 == 4) || 
-                        (pr12 == 1 && nr2 == 5) || 
-                        (pr12 == 4 && nr2 == 1) ||
-                        (pr12 == 5 && nr2 == 1) || 
-                        (pr12 == 4 && nr2 == 5) ||
-                        (pr12 == nr2))
-                    then TyPhrase(pr11,nr2)
-                    else error fi "Phrase constructors' rank mismatch"
-                  )
-                | TyPhrase(pr21,pr22) -> (
-                    if ((pr12 == 1 && pr21 == 4) || 
-                        (pr12 == 1 && pr21 == 5) || 
-                        (pr12 == 4 && pr21 == 1) ||
-                        (pr12 == 5 && pr21 == 1) || 
-                        (pr12 == 4 && pr21 == 5) ||
-                        (pr12 == pr21))
-                    then TyPhrase(pr11,pr22)
-                    else error fi "Phrase constructors' rank mismatch"
-                  )
-                | _ -> error fi "invalid phrase constructor #2"
+              rank1 := pr12;
+              (match typet2 with
+                  TyNote(nr2) | TyNoteset(nr2) -> rank2 := nr2; rank3 := nr2;
+                | TyPhrase(pr21,pr22) -> rank2 := pr21; rank3 := pr22;
+                | _ -> error fi "invalid phrase constructor #2")
             )
-          | _ -> error fi "invalid phrase constructor #1"
+          | _ -> error fi "invalid phrase constructor #1");
+        if ((!rank1 == 1 && !rank2 == 4) || 
+            (!rank1 == 1 && !rank2 == 5) || 
+            (!rank1 == 4 && !rank2 == 1) ||
+            (!rank1 == 5 && !rank2 == 1) || 
+            (!rank1 == 4 && !rank2 == 5) ||
+            (!rank1 == !rank2))
+        then TyPhrase(!rank1,!rank3)
+        else error fi "Phrase constructors' rank mismatch"
       )
   | TmSegment(fi,t1,mode_pitch,mode_class) -> 
       let typet1 = typeof ctx t1 in (
