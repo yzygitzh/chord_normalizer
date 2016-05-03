@@ -196,10 +196,10 @@ AType :
       { fun ctx -> TyNoteset($3.v) }
   | PHRASE AT LPAREN INTV COMMA INTV RPAREN
       { fun ctx -> TyPhrase($4.v,$6.v) }
-  | SEGMENT AT LPAREN INTV COMMA STRINGV COMMA STRINGV RPAREN
-      { fun ctx -> TySegment($4.v,$6.v,$8.v) }
-  | PASSAGE
-      { fun ctx -> TyPassage }
+  | SEGMENT AT LPAREN INTV COMMA STRINGV RPAREN
+      { fun ctx -> TySegment($4.v,$6.v) }
+  | PASSAGE AT LPAREN INTV COMMA STRINGV COMMA INTV COMMA STRINGV RPAREN
+      { fun ctx -> TyPassage($4.v,$6.v,$8.v,$10.v) }
 
 TyBinder :
     /* empty */
@@ -283,8 +283,8 @@ AppTerm :
       { fun ctx -> TmNoteset($1, $2 ctx, $3 ctx) }
   | MAKEPHRASE PathTerm PathTerm
       { fun ctx -> TmPhrase($1, $2 ctx, $3 ctx) }
-  | MAKESEGMENT PathTerm LPAREN INTV COMMA STRINGV COMMA STRINGV RPAREN
-      { fun ctx -> TmSegment($1, $2 ctx, $4.v, $6.v, $8.v) }
+  | MAKESEGMENT PathTerm LPAREN INTV COMMA STRINGV RPAREN
+      { fun ctx -> TmSegment($1, $2 ctx, $4.v, $6.v) }
   | MAKEPASSAGE PathTerm PathTerm
       { fun ctx -> TmPassage($1, $2 ctx, $3 ctx) }
 

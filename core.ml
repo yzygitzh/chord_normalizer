@@ -26,7 +26,7 @@ let rec isval ctx t = match t with
   | TmNote(_,_,_,_,_) -> true
   | TmNoteset(_,_,_) -> true
   | TmPhrase(_,_,_) -> true
-  | TmSegment(_,_,_,_,_) -> true
+  | TmSegment(_,_,_,_) -> true
   | TmPassage(_,_,_) -> true
   | _ -> false
 
@@ -193,10 +193,13 @@ let rec tyeqv ctx tyS tyT =
         if (rank1 == rank2) then true else false
   | (TyPhrase(begin_rank1,end_rank1),TyPhrase(begin_rank2,end_rank2)) -> 
         if ((begin_rank1 == end_rank1) && (begin_rank2 == end_rank2)) then true else false
-  | (TySegment(p1,d1,c1),TySegment(p2,d2,c2)) -> 
-        if ((p1 == p2) && (0 == String.compare d1 d2) && (0 == String.compare c1 c2))
+  | (TySegment(p1,c1),TySegment(p2,c2)) -> 
+        if ((p1 == p2) && (0 == String.compare c1 c2))
         then true else false
-  | (TyPassage,TyPassage) -> true
+  | (TyPassage(p11,c11,p12,c12),TyPassage(p21,c21,p22,c22)) -> 
+        if ((p11 == p21) && (0 == String.compare c11 c21) &&
+            (p12 == p22) && (0 == String.compare c12 c22))
+        then true else false
   | _ -> false
 
 (* ------------------------   TYPING  ------------------------ *)
@@ -426,18 +429,14 @@ let rec typeof ctx t =
             )
           | _ -> error fi "invalid phrase constructor #1"
       )
-  | TmSegment(fi,t1,mode_pitch,mode_descriptor,mode_class) -> 
+  | TmSegment(fi,t1,mode_pitch,mode_class) -> 
       let typet1 = typeof ctx t1 in (
         match typet1 with
             TyPhrase(1,1) ->
               if (mode_pitch >= 1 && mode_pitch <= 12) then (
-                match mode_descriptor with 
-                    "natural" | "harmony" | "melody" -> (
-                      match mode_class with
-                          "major" | "minor" -> TySegment(mode_pitch,mode_descriptor,mode_class)
-                        | _ -> error fi "invalid segment mode class"
-                    )
-                  | _ -> error fi "invalid segment mode descriptor"
+                match mode_class with
+                    "major" | "minor" -> TySegment(mode_pitch,mode_class)
+                  | _ -> error fi "invalid segment mode class"
               )
               else error fi "invalid segment mode pitch"
           | _ -> error fi "invalid segment phrase"
@@ -446,10 +445,69 @@ let rec typeof ctx t =
       let typet1 = typeof ctx t1 in 
       let typet2 = typeof ctx t2 in (
         match typet1 with 
-          TySegment(_) | TyPassage -> (
+          TySegment(sp1,sc1) -> (
             match typet2 with
-              TySegment(_) | TyPassage -> TyPassage
+              TySegment(sp2,sc2) -> 
+                let mode_class_same = (0 == String.compare sc1 sc2) in 
+                let class1_is_major = (0 == String.compare sc1 "major") in
+                let class2_is_minor = (0 == String.compare sc2 "minor") in
+                if ((sp2 == sp1 && mode_class_same) ||
+                    (sp2 == (sp1 + 2) mod 12 && class1_is_major && not mode_class_same) ||
+                    (sp2 == (sp1 + 3) mod 12 && not class1_is_major && not mode_class_same) ||
+                    (sp2 == (sp1 + 4) mod 12 && class1_is_major && not mode_class_same) ||
+                    (sp2 == (sp1 + 5) mod 12 && (class1_is_major || mode_class_same)) ||
+                    (sp2 == (sp1 + 7) mod 12 && (class2_is_minor || mode_class_same)) ||
+                    (sp2 == (sp1 + 8) mod 12 && not class1_is_major && not mode_class_same) ||
+                    (sp2 == (sp1 + 9) mod 12 && class1_is_major && not mode_class_same) ||
+                    (sp2 == (sp1 +10) mod 12 && not class1_is_major && not mode_class_same))
+                then TyPassage(sp1,sc1,sp2,sc2) else error fi "passage constructor's mode don't match"
+            | TyPassage(pp21,pc21,pp22,pc22) -> 
+                let mode_class_same = (0 == String.compare sc1 pc21) in 
+                let class1_is_major = (0 == String.compare sc1 "major") in
+                let class2_is_minor = (0 == String.compare pc21 "minor") in
+                if ((pp21 == sp1 && mode_class_same) ||
+                    (pp21 == (sp1 + 2) mod 12 && class1_is_major && not mode_class_same) ||
+                    (pp21 == (sp1 + 3) mod 12 && not class1_is_major && not mode_class_same) ||
+                    (pp21 == (sp1 + 4) mod 12 && class1_is_major && not mode_class_same) ||
+                    (pp21 == (sp1 + 5) mod 12 && (class1_is_major || mode_class_same)) ||
+                    (pp21 == (sp1 + 7) mod 12 && (class2_is_minor || mode_class_same)) ||
+                    (pp21 == (sp1 + 8) mod 12 && not class1_is_major && not mode_class_same) ||
+                    (pp21 == (sp1 + 9) mod 12 && class1_is_major && not mode_class_same) ||
+                    (pp21 == (sp1 +10) mod 12 && not class1_is_major && not mode_class_same))
+                then TyPassage(sp1,sc1,pp22,pc22) else error fi "passage constructor's mode don't match"
             | _ -> error fi "invalid passage constructor #2"
           )
+        | TyPassage(pp11,pc11,pp12,pc12) -> (
+            match typet2 with
+              TySegment(sp2,sc2) -> 
+                let mode_class_same = (0 == String.compare pc12 sc2) in 
+                let class1_is_major = (0 == String.compare pc12 "major") in
+                let class2_is_minor = (0 == String.compare sc2 "minor") in
+                if ((sp2 == pp12 && mode_class_same) ||
+                    (sp2 == (pp12 + 2) mod 12 && class1_is_major && not mode_class_same) ||
+                    (sp2 == (pp12 + 3) mod 12 && not class1_is_major && not mode_class_same) ||
+                    (sp2 == (pp12 + 4) mod 12 && class1_is_major && not mode_class_same) ||
+                    (sp2 == (pp12 + 5) mod 12 && (class1_is_major || mode_class_same)) ||
+                    (sp2 == (pp12 + 7) mod 12 && (class2_is_minor || mode_class_same)) ||
+                    (sp2 == (pp12 + 8) mod 12 && not class1_is_major && not mode_class_same) ||
+                    (sp2 == (pp12 + 9) mod 12 && class1_is_major && not mode_class_same) ||
+                    (sp2 == (pp12 +10) mod 12 && not class1_is_major && not mode_class_same))
+                then TyPassage(pp11,pc11,sp2,sc2) else error fi "passage constructor's mode don't match"
+            | TyPassage(pp21,pc21,pp22,pc22) -> 
+                let mode_class_same = (0 == String.compare pc12 pc21) in 
+                let class1_is_major = (0 == String.compare pc12 "major") in
+                let class2_is_minor = (0 == String.compare pc21 "minor") in
+                if ((pp21 == pp12 && mode_class_same) ||
+                    (pp21 == (pp12 + 2) mod 12 && class1_is_major && not mode_class_same) ||
+                    (pp21 == (pp12 + 3) mod 12 && not class1_is_major && not mode_class_same) ||
+                    (pp21 == (pp12 + 4) mod 12 && class1_is_major && not mode_class_same) ||
+                    (pp21 == (pp12 + 5) mod 12 && (class1_is_major || mode_class_same)) ||
+                    (pp21 == (pp12 + 7) mod 12 && (class2_is_minor || mode_class_same)) ||
+                    (pp21 == (pp12 + 8) mod 12 && not class1_is_major && not mode_class_same) ||
+                    (pp21 == (pp12 + 9) mod 12 && class1_is_major && not mode_class_same) ||
+                    (pp21 == (pp12 +10) mod 12 && not class1_is_major && not mode_class_same))
+                then TyPassage(pp11,pc11,pp22,pc22) else error fi "passage constructor's mode don't match"
+            | _ -> error fi "invalid passage constructor #2"
+        )
         | _ -> error fi "invalid passage constructor #1"
       )

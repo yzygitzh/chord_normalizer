@@ -20,8 +20,8 @@ type ty =
   | TyNote of int
   | TyNoteset of int
   | TyPhrase of int * int
-  | TySegment of int * string * string
-  | TyPassage
+  | TySegment of int * string
+  | TyPassage of int * string * int * string
 
 type term =
     TmTrue of info
@@ -50,7 +50,7 @@ type term =
   | TmNote of info * string * string * string * int
   | TmNoteset of info * term * term
   | TmPhrase of info * term * term
-  | TmSegment of info * term * int * string * string
+  | TmSegment of info * term * int * string
   | TmPassage of info * term * term
 
 type binding =
@@ -121,8 +121,8 @@ let tymap onvar c tyT =
   | TyNote(rank) -> TyNote(rank)
   | TyNoteset(rank) -> TyNoteset(rank)
   | TyPhrase(begin_rank,end_rank) -> TyPhrase(begin_rank,end_rank)
-  | TySegment(mode_pitch,mode_descriptor,mode_class) -> TySegment(mode_pitch,mode_descriptor,mode_class)
-  | TyPassage -> TyPassage
+  | TySegment(mode_pitch,mode_class) -> TySegment(mode_pitch,mode_class)
+  | TyPassage(begin_mp,begin_mc,end_mp,end_mc) -> TyPassage(begin_mp,begin_mc,end_mp,end_mc)
   | TyArr(tyT1,tyT2) -> TyArr(walk c tyT1,walk c tyT2)
   | TyVariant(fieldtys) -> TyVariant(List.map (fun (li,tyTi) -> (li, walk c tyTi)) fieldtys)
   in walk c tyT
@@ -160,8 +160,8 @@ let tmmap onvar ontype c t =
   | TmNote _ as t -> t
   | TmNoteset(fi,t1,t2) -> TmNoteset(fi, walk c t1, walk c t2)
   | TmPhrase(fi,t1,t2) -> TmPhrase(fi, walk c t1, walk c t2)
-  | TmSegment(fi,t1,mode_pitch,mode_descriptor,mode_class) -> 
-    TmSegment(fi, walk c t1, mode_pitch,mode_descriptor,mode_class)
+  | TmSegment(fi,t1,mode_pitch,mode_class) -> 
+    TmSegment(fi, walk c t1, mode_pitch,mode_class)
   | TmPassage(fi,t1,t2) -> TmPassage(fi, walk c t1, walk c t2)
   in walk c t
 
@@ -270,7 +270,7 @@ let tmInfo t = match t with
   | TmNote(fi,_,_,_,_) -> fi
   | TmNoteset(fi,_,_) -> fi
   | TmPhrase(fi,_,_) -> fi
-  | TmSegment(fi,_,_,_,_) -> fi
+  | TmSegment(fi,_,_,_) -> fi
   | TmPassage(fi,_,_) -> fi
 
 (* ---------------------------------------------------------------------- *)
@@ -355,9 +355,20 @@ and printty_AType outer ctx tyT = match tyT with
   | TyNoteset(rank) -> pr (String.concat "@" ["Noteset";string_of_int rank])
   | TyPhrase(begin_rank,end_rank) -> pr (String.concat "@" 
     ["Phrase";(String.concat "->" [string_of_int begin_rank; string_of_int end_rank])])
-  | TySegment(mode_pitch,mode_descriptor,mode_class) -> pr (String.concat "@" 
-    ["Segment";(String.concat " " [string_of_int mode_pitch;mode_descriptor;mode_class])])
-  | TyPassage -> pr "Passage"
+  | TySegment(mode_pitch,mode_class) -> pr (String.concat "@" 
+    ["Segment";(String.concat "_" [string_of_int mode_pitch;mode_class])])
+  | TyPassage(begin_mp,begin_mc,end_mp,end_mc) -> pr 
+  (String.concat "@" 
+  [
+    "Passage";
+    (String.concat "->" 
+    [
+      (String.concat "_" 
+      [string_of_int begin_mp; begin_mc]);
+      (String.concat "_" 
+      [string_of_int end_mp; end_mc])
+    ])
+  ])
   | tyT -> pr "("; printty_Type outer ctx tyT; pr ")"
 
 let printty ctx tyT = printty_Type true ctx tyT 
@@ -482,7 +493,7 @@ and printtm_ATerm outer ctx t = match t with
   | TmNote(fi,_,_,_,_) -> pr "note"
   | TmNoteset(fi,_,_) -> pr "noteset"
   | TmPhrase(fi,_,_) -> pr "phrase"
-  | TmSegment(fi,_,_,_,_) -> pr "segment"
+  | TmSegment(fi,_,_,_) -> pr "segment"
   | TmPassage(fi,_,_) -> pr "passage"
   | t -> pr "("; printtm_Term outer ctx t; pr ")"
 

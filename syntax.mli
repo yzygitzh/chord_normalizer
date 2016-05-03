@@ -19,8 +19,8 @@ type ty =
   | TyNote of int
   | TyNoteset of int
   | TyPhrase of int * int
-  | TySegment of int * string * string
-  | TyPassage
+  | TySegment of int * string
+  | TyPassage of int * string * int * string
 
 type term =
     TmTrue of info
@@ -49,7 +49,7 @@ type term =
   | TmNote of info * string * string * string * int
   | TmNoteset of info * term * term
   | TmPhrase of info * term * term
-  | TmSegment of info * term * int * string * string
+  | TmSegment of info * term * int * string
   | TmPassage of info * term * term
 
 type binding =
