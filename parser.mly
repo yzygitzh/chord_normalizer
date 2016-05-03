@@ -50,6 +50,7 @@ open Syntax
 /* @yzy for chord normalizer */
 %token <Support.Error.info> NOTE
 %token <Support.Error.info> NOTESET
+%token <Support.Error.info> MAKENOTESET
 
 /* Identifier and constant value tokens */
 %token <string Support.Error.withinfo> UCID  /* uppercase-initial */
@@ -99,6 +100,7 @@ open Syntax
 /* @yzy for chord normalizer */
 %token <Support.Error.info> LCURLYHASH
 %token <Support.Error.info> HASHRCURLY
+%token <Support.Error.info> AT
 
 /* ---------------------------------------------------------------------- */
 /* The starting production of the generated parser is the syntactic class
@@ -182,10 +184,10 @@ AType :
   | NAT
       { fun ctx -> TyNat }
     /* @yzy for chord normalizer */
-  | NOTE
-      { fun ctx -> TyNote }
-  | NOTESET
-      { fun ctx -> TyNoteset }
+  | NOTE AT INTV
+      { fun ctx -> TyNote($3.v) }
+  | NOTESET AT INTV
+      { fun ctx -> TyNoteset($3.v) }
 
 TyBinder :
     /* empty */
@@ -265,7 +267,7 @@ AppTerm :
   | ISZERO PathTerm
       { fun ctx -> TmIsZero($1, $2 ctx) }
   /* @yzy for chord normalizer */
-  | NOTESET PathTerm PathTerm
+  | MAKENOTESET PathTerm PathTerm
       { fun ctx -> TmNoteset($1, $2 ctx, $3 ctx) }
 
 AscribeTerm :

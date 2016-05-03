@@ -39,6 +39,7 @@ let reservedWords = [
   (* @yzy for chord normalizer *)
   ("Note", fun i -> Parser.NOTE i);
   ("Noteset", fun i -> Parser.NOTESET i);
+  ("MakeNoteset", fun i -> Parser.MAKENOTESET i);
   
   (* Symbols *)
   ("_", fun i -> Parser.USCORE i);
@@ -74,6 +75,7 @@ let reservedWords = [
   (* @yzy for chord normalizer *)
   ("{#", fun i -> Parser.LCURLYHASH i);
   ("#}", fun i -> Parser.HASHRCURLY i);
+  ("@", fun i -> Parser.AT i);
 
   (* Special compound symbols: *)
   (":=", fun i -> Parser.COLONEQ i);

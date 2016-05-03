@@ -16,8 +16,8 @@ type ty =
   | TyFloat
   | TyNat
   (* @yzy for chord normalizer *)
-  | TyNote
-  | TyNoteset
+  | TyNote of int
+  | TyNoteset of int
 
 type term =
     TmTrue of info

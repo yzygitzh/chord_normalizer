@@ -184,8 +184,10 @@ let rec tyeqv ctx tyS tyT =
                (li1=li2) && tyeqv ctx tyTi1 tyTi2)
             fields1 fields2
   (* @yzy for chord normalizer *)
-  | (TyNote,TyNote) -> true
-  | (TyNoteset,TyNoteset) -> true
+  | (TyNote(rank1),TyNote(rank2)) -> 
+        if (rank1 == rank2) then true else false
+  | (TyNoteset(rank1),TyNoteset(rank2)) -> 
+        if (rank1 == rank2) then true else false
   | _ -> false
 
 (* ------------------------   TYPING  ------------------------ *)
@@ -301,15 +303,16 @@ let rec typeof ctx t =
   (* @yzy for chord normalizer *)
   | TmNote(fi,ty,seq,height,len) ->
       (match ty with
-          "chord" | "brokenchord" | "melody" -> TyNote
+          "chord" | "brokenchord" -> TyNote(0)
+        | "melody" -> TyNote(0)
         | _ -> error fi "invalid note type; a note must be a chord / brokenchord / melody")
   | TmNoteset(fi,t1,t2) ->
       let typet1 = typeof ctx t1 in
       (match typet1 with
-          TyNote | TyNoteset -> (
+          TyNote(0) | TyNoteset(0) -> (
             let typet2 = typeof ctx t2 in
             (match typet2 with
-                TyNote | TyNoteset -> TyNoteset
+                TyNote(0) | TyNoteset(0) -> TyNoteset(0)
               | _ -> error fi "invalid noteset constructor #2")
           )
         | _ -> error fi "invalid noteset constructor #1")

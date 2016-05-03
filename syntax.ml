@@ -17,8 +17,8 @@ type ty =
   | TyFloat
   | TyNat
   (* @yzy for chord normalizer *)
-  | TyNote
-  | TyNoteset
+  | TyNote of int
+  | TyNoteset of int
 
 type term =
     TmTrue of info
@@ -112,8 +112,8 @@ let tymap onvar c tyT =
   | TyBool -> TyBool
   | TyNat -> TyNat
   (* @yzy for chord normalizer *)
-  | TyNote -> TyNote
-  | TyNoteset -> TyNoteset
+  | TyNote(rank) -> TyNote(rank)
+  | TyNoteset(rank) -> TyNoteset(rank)
   | TyArr(tyT1,tyT2) -> TyArr(walk c tyT1,walk c tyT2)
   | TyVariant(fieldtys) -> TyVariant(List.map (fun (li,tyTi) -> (li, walk c tyTi)) fieldtys)
   in walk c tyT
@@ -335,8 +335,8 @@ and printty_AType outer ctx tyT = match tyT with
   | TyFloat -> pr "Float"
   | TyNat -> pr "Nat"
   (* @yzy for chord normalizer *)
-  | TyNote -> pr "Note (todo: nicer type printing)"
-  | TyNoteset -> pr "Noteset (todo: nicer type printing)"
+  | TyNote(rank) -> pr (String.concat " " ["Note";string_of_int rank])
+  | TyNoteset(rank) -> pr (String.concat " " ["Noteset";string_of_int rank])
   | tyT -> pr "("; printty_Type outer ctx tyT; pr ")"
 
 let printty ctx tyT = printty_Type true ctx tyT 
