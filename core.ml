@@ -302,17 +302,65 @@ let rec typeof ctx t =
       else error fi "argument of iszero is not a number"
   (* @yzy for chord normalizer *)
   | TmNote(fi,ty,seq,height,len) ->
-      (match ty with
-          "chord" | "brokenchord" -> TyNote(0)
-        | "melody" -> TyNote(0)
-        | _ -> error fi "invalid note type; a note must be a chord / brokenchord / melody")
-  | TmNoteset(fi,t1,t2) ->
-      let typet1 = typeof ctx t1 in
-      (match typet1 with
-          TyNote(0) | TyNoteset(0) -> (
-            let typet2 = typeof ctx t2 in
-            (match typet2 with
-                TyNote(0) | TyNoteset(0) -> TyNoteset(0)
-              | _ -> error fi "invalid noteset constructor #2")
+      let regex_numseq = Str.regexp "[0-9]+" in
+      let seq_len = String.length seq in 
+      let height_len = String.length height in
+      if ((Str.string_match regex_numseq seq 0) && 
+          (Str.string_match regex_numseq height 0) &&
+          (seq_len == height_len)) then (
+            match ty with
+              "chord" | "brokenchord" -> (
+                let regex_p1 = Str.regexp "[135]+" in 
+                let regex_p2 = Str.regexp "[246]+" in 
+                let regex_p3 = Str.regexp "[357]+" in 
+                let regex_p4 = Str.regexp "[146]+" in 
+                let regex_p5 = Str.regexp "[257]+" in 
+                let regex_p6 = Str.regexp "[136]+" in 
+                let regex_p7 = Str.regexp "[247]+" in (
+                  if ((Str.string_match regex_p1 seq 0) && 
+                      (seq_len == String.length (Str.matched_string seq))) then TyNote(1)
+                  else if ((Str.string_match regex_p2 seq 0) && 
+                      (seq_len == String.length (Str.matched_string seq))) then TyNote(2)
+                  else if ((Str.string_match regex_p3 seq 0) && 
+                      (seq_len == String.length (Str.matched_string seq))) then TyNote(3)
+                  else if ((Str.string_match regex_p4 seq 0) && 
+                      (seq_len == String.length (Str.matched_string seq))) then TyNote(4)
+                  else if ((Str.string_match regex_p5 seq 0) && 
+                      (seq_len == String.length (Str.matched_string seq))) then TyNote(5)
+                  else if ((Str.string_match regex_p6 seq 0) && 
+                      (seq_len == String.length (Str.matched_string seq))) then TyNote(6)
+                  else if ((Str.string_match regex_p7 seq 0) && 
+                      (seq_len == String.length (Str.matched_string seq))) then TyNote(7)
+                  else error fi "invalid chord / brokenchord sequence"
+                )
+              )
+            | "melody" -> (
+                let first_tone = String.get seq 0 in (
+                  if (first_tone == '1') then TyNote(1)
+                  else if (first_tone == '2') then TyNote(2)
+                  else if (first_tone == '3') then TyNote(3)
+                  else if (first_tone == '4') then TyNote(4)
+                  else if (first_tone == '5') then TyNote(5)
+                  else if (first_tone == '6') then TyNote(6)
+                  else if (first_tone == '7') then TyNote(7)
+                  else error fi "invalid melody sequence"
+                )
+              )
+            | _ -> error fi "invalid note type; a note must be a chord / brokenchord / melody"
           )
-        | _ -> error fi "invalid noteset constructor #1")
+      else error fi "invalid sequence / height"
+  | TmNoteset(fi,t1,t2) ->
+      let typet1 = typeof ctx t1 in (
+        match typet1 with
+            TyNote(rank1) | TyNoteset(rank1) -> (
+              let typet2 = typeof ctx t2 in (
+              match typet2 with
+                  TyNote(rank2) | TyNoteset(rank2) -> (
+                    if (rank1 == rank2) then TyNoteset(rank1)
+                    else error fi "Noteset constructors' rank mismatch"
+                  )
+                | _ -> error fi "invalid noteset constructor #2"
+              )
+            )
+          | _ -> error fi "invalid noteset constructor #1"
+      )

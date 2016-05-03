@@ -20,6 +20,9 @@ OBJS = support.cmo syntax.cmo core.cmo parser.cmo lexer.cmo main.cmo
 # Files that need to be generated from other files
 DEPEND += lexer.ml parser.ml 
 
+# str.cma
+COMMONOBJS += str.cma
+
 # When "make" is invoked with no arguments, we build an executable 
 # typechecker, after building everything that it depends on
 all: $(DEPEND) $(OBJS) f

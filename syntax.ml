@@ -335,8 +335,8 @@ and printty_AType outer ctx tyT = match tyT with
   | TyFloat -> pr "Float"
   | TyNat -> pr "Nat"
   (* @yzy for chord normalizer *)
-  | TyNote(rank) -> pr (String.concat " " ["Note";string_of_int rank])
-  | TyNoteset(rank) -> pr (String.concat " " ["Noteset";string_of_int rank])
+  | TyNote(rank) -> pr (String.concat "@" ["Note";string_of_int rank])
+  | TyNoteset(rank) -> pr (String.concat "@" ["Noteset";string_of_int rank])
   | tyT -> pr "("; printty_Type outer ctx tyT; pr ")"
 
 let printty ctx tyT = printty_Type true ctx tyT 
@@ -458,8 +458,8 @@ and printtm_ATerm outer ctx t = match t with
        | _ -> (pr "(succ "; printtm_ATerm false ctx t1; pr ")")
      in f 1 t1
   (* @yzy for chord normalizer *)
-  | TmNote(_) -> pr "todo: print note term"
-  | TmNoteset(_) -> pr "todo: print noteset term"
+  | TmNote(_) -> pr "note"
+  | TmNoteset(_) -> pr "noteset"
   | t -> pr "("; printtm_Term outer ctx t; pr ")"
 
 let printtm ctx t = printtm_Term true ctx t 
