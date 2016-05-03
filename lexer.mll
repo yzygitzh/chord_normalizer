@@ -40,6 +40,12 @@ let reservedWords = [
   ("Note", fun i -> Parser.NOTE i);
   ("Noteset", fun i -> Parser.NOTESET i);
   ("MakeNoteset", fun i -> Parser.MAKENOTESET i);
+  ("Phrase", fun i -> Parser.PHRASE i);
+  ("MakePhrase", fun i -> Parser.MAKEPHRASE i);
+  ("Segment", fun i -> Parser.SEGMENT i);
+  ("MakeSegment", fun i -> Parser.MAKESEGMENT i);
+  ("Passage", fun i -> Parser.PASSAGE i);
+  ("MakePassage", fun i -> Parser.MAKEPASSAGE i);
   
   (* Symbols *)
   ("_", fun i -> Parser.USCORE i);

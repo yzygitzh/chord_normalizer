@@ -18,6 +18,9 @@ type ty =
   (* @yzy for chord normalizer *)
   | TyNote of int
   | TyNoteset of int
+  | TyPhrase of int * int
+  | TySegment of int * string * string
+  | TyPassage
 
 type term =
     TmTrue of info
@@ -45,6 +48,9 @@ type term =
   (* @yzy for chord normalizer *)
   | TmNote of info * string * string * string * int
   | TmNoteset of info * term * term
+  | TmPhrase of info * term * term
+  | TmSegment of info * term * int * string * string
+  | TmPassage of info * term * term
 
 type binding =
     NameBind 

@@ -51,6 +51,12 @@ open Syntax
 %token <Support.Error.info> NOTE
 %token <Support.Error.info> NOTESET
 %token <Support.Error.info> MAKENOTESET
+%token <Support.Error.info> PHRASE
+%token <Support.Error.info> MAKEPHRASE
+%token <Support.Error.info> SEGMENT
+%token <Support.Error.info> MAKESEGMENT
+%token <Support.Error.info> PASSAGE
+%token <Support.Error.info> MAKEPASSAGE
 
 /* Identifier and constant value tokens */
 %token <string Support.Error.withinfo> UCID  /* uppercase-initial */
@@ -188,6 +194,12 @@ AType :
       { fun ctx -> TyNote($3.v) }
   | NOTESET AT INTV
       { fun ctx -> TyNoteset($3.v) }
+  | PHRASE AT LPAREN INTV COMMA INTV RPAREN
+      { fun ctx -> TyPhrase($4.v,$6.v) }
+  | SEGMENT AT LPAREN INTV COMMA STRINGV COMMA STRINGV RPAREN
+      { fun ctx -> TySegment($4.v,$6.v,$8.v) }
+  | PASSAGE
+      { fun ctx -> TyPassage }
 
 TyBinder :
     /* empty */
@@ -269,6 +281,12 @@ AppTerm :
   /* @yzy for chord normalizer */
   | MAKENOTESET PathTerm PathTerm
       { fun ctx -> TmNoteset($1, $2 ctx, $3 ctx) }
+  | MAKEPHRASE PathTerm PathTerm
+      { fun ctx -> TmPhrase($1, $2 ctx, $3 ctx) }
+  | MAKESEGMENT PathTerm LPAREN INTV COMMA STRINGV COMMA STRINGV RPAREN
+      { fun ctx -> TmSegment($1, $2 ctx, $4.v, $6.v, $8.v) }
+  | MAKEPASSAGE PathTerm PathTerm
+      { fun ctx -> TmPassage($1, $2 ctx, $3 ctx) }
 
 AscribeTerm :
     ATerm AS Type

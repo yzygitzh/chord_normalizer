@@ -1,17 +1,15 @@
 /* Examples for music testing */
-let x = {#"chord"|"135"|"135"|3#} in x;
-{#"brokenchord"|"135"|"135"|3#};
-{#"melody"|"135"|"135"|3#};
+x = {#"chord"|"641"|"135"|3#};
+y = {#"brokenchord"|"641"|"135"|3#};
+z = {#"melody"|"135"|"135"|3#};
 
-{#"chord"|"461"|"135"|3#};
-
-MakeNoteset {#"melody"|"246"|"135"|3#} {#"melody"|"246"|"135"|3#};
+MakeSegment (MakePhrase z (MakePhrase (MakeNoteset x y) z))(3,"harmony","major");
 
 let x = (MakeNoteset
-			{#"melody"|"135"|"135"|3#} 
-			{#"melody"|"135"|"135"|3#}) in 
+			{#"chord"|"135"|"135"|3#} 
+			{#"brokenchord"|"135"|"135"|3#}) in 
 let y = (MakeNoteset
-			{#"melody"|"135"|"135"|3#} 
+			{#"chord"|"531"|"135"|3#} 
 			{#"melody"|"135"|"135"|3#}) in
 		(MakeNoteset x y);
 
