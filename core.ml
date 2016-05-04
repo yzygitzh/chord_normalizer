@@ -28,6 +28,10 @@ let rec isval ctx t = match t with
   | TmPhrase(_,_,_) -> true
   | TmSegment(_,_,_,_) -> true
   | TmPassage(_,_,_) -> true
+  | TmExportPsg(fi,psg,filename) ->
+    (match filename with 
+        TmString _ -> true
+      | _ -> false)
   | _ -> false
 
 let rec eval1 ctx t = match t with
@@ -120,6 +124,10 @@ let rec eval1 ctx t = match t with
   | TmIsZero(fi,t1) ->
       let t1' = eval1 ctx t1 in
       TmIsZero(fi, t1')
+  (* @yzy for chord normalizer *)
+  | TmExportPsg(fi,psg,filename) when (not (isval ctx filename)) ->
+      let filename' = eval1 ctx filename in
+      TmExportPsg(fi,psg,filename')
   | _ -> 
       raise NoRuleApplies
 
@@ -200,6 +208,7 @@ let rec tyeqv ctx tyS tyT =
         if ((p11 == p21) && (0 == String.compare c11 c21) &&
             (p12 == p22) && (0 == String.compare c12 c22))
         then true else false
+  | (TyExportPsg,TyExportPsg) -> true
   | _ -> false
 
 (* ------------------------   TYPING  ------------------------ *)
@@ -439,4 +448,15 @@ let rec typeof ctx t =
             (!pitch3 == (!pitch2 +10) mod 12 && not class1_is_major && not mode_class_same))
         then TyPassage(!pitch1,!class1,!pitch4,!class4) 
         else error fi "passage constructor's mode don't match"
+      )
+  | TmExportPsg(fi,t1,t2) ->
+      let typet1 = typeof ctx t1 in 
+      let typet2 = typeof ctx t2 in (
+        match typet1 with
+            TyPassage(_) -> (
+              match typet2 with
+                  TyString -> TyExportPsg
+                | _ -> error fi "invalid export file name (type checking)"
+            )
+          | _ -> error fi "invalid passage to export"
       )

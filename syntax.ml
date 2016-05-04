@@ -22,6 +22,7 @@ type ty =
   | TyPhrase of int * int
   | TySegment of int * string
   | TyPassage of int * string * int * string
+  | TyExportPsg
 
 type term =
     TmTrue of info
@@ -52,6 +53,7 @@ type term =
   | TmPhrase of info * term * term
   | TmSegment of info * term * int * string
   | TmPassage of info * term * term
+  | TmExportPsg of info * term * term
 
 type binding =
     NameBind 
@@ -123,8 +125,9 @@ let tymap onvar c tyT =
   | TyPhrase(begin_rank,end_rank) -> TyPhrase(begin_rank,end_rank)
   | TySegment(mode_pitch,mode_class) -> TySegment(mode_pitch,mode_class)
   | TyPassage(begin_mp,begin_mc,end_mp,end_mc) -> TyPassage(begin_mp,begin_mc,end_mp,end_mc)
+  | TyExportPsg -> TyExportPsg
   | TyArr(tyT1,tyT2) -> TyArr(walk c tyT1,walk c tyT2)
-  | TyVariant(fieldtys) -> TyVariant(List.map (fun (li,tyTi) -> (li, walk c tyTi)) fieldtys)
+  | TyVariant(fieldtys) -> TyVariant(List.map (fun (li,tyTi) -> (li, walk c tyTi)) fieldtys)  
   in walk c tyT
 
 let tmmap onvar ontype c t = 
@@ -163,6 +166,7 @@ let tmmap onvar ontype c t =
   | TmSegment(fi,t1,mode_pitch,mode_class) -> 
     TmSegment(fi, walk c t1, mode_pitch,mode_class)
   | TmPassage(fi,t1,t2) -> TmPassage(fi, walk c t1, walk c t2)
+  | TmExportPsg(fi,t1,t2) -> TmExportPsg(fi, walk c t1, walk c t2)
   in walk c t
 
 let typeShiftAbove d c tyT =
@@ -272,6 +276,7 @@ let tmInfo t = match t with
   | TmPhrase(fi,_,_) -> fi
   | TmSegment(fi,_,_,_) -> fi
   | TmPassage(fi,_,_) -> fi
+  | TmExportPsg(fi,_,_) -> fi
 
 (* ---------------------------------------------------------------------- *)
 (* Printing *)
@@ -369,6 +374,7 @@ and printty_AType outer ctx tyT = match tyT with
       [string_of_int end_mp; end_mc])
     ])
   ])
+  | TyExportPsg -> pr "Exported Passage"
   | tyT -> pr "("; printty_Type outer ctx tyT; pr ")"
 
 let printty ctx tyT = printty_Type true ctx tyT 
@@ -495,6 +501,10 @@ and printtm_ATerm outer ctx t = match t with
   | TmPhrase(fi,_,_) -> pr "phrase"
   | TmSegment(fi,_,_,_) -> pr "segment"
   | TmPassage(fi,_,_) -> pr "passage"
+  | TmExportPsg(fi,_,filename) ->
+    (match filename with
+        TmString(_,s) -> pr (String.concat " " ["passage exported to file";s])
+      | _ -> pr "invalid export file name (evaluating)" )
   | t -> pr "("; printtm_Term outer ctx t; pr ")"
 
 let printtm ctx t = printtm_Term true ctx t 

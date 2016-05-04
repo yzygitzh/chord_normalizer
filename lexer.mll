@@ -46,6 +46,7 @@ let reservedWords = [
   ("MakeSegment", fun i -> Parser.MAKESEGMENT i);
   ("Passage", fun i -> Parser.PASSAGE i);
   ("MakePassage", fun i -> Parser.MAKEPASSAGE i);
+  ("ExportPsg", fun i -> Parser.EXPORTPSG i);
   
   (* Symbols *)
   ("_", fun i -> Parser.USCORE i);

@@ -57,6 +57,7 @@ open Syntax
 %token <Support.Error.info> MAKESEGMENT
 %token <Support.Error.info> PASSAGE
 %token <Support.Error.info> MAKEPASSAGE
+%token <Support.Error.info> EXPORTPSG
 
 /* Identifier and constant value tokens */
 %token <string Support.Error.withinfo> UCID  /* uppercase-initial */
@@ -287,6 +288,8 @@ AppTerm :
       { fun ctx -> TmSegment($1, $2 ctx, $4.v, $6.v) }
   | MAKEPASSAGE PathTerm PathTerm
       { fun ctx -> TmPassage($1, $2 ctx, $3 ctx) }
+  | EXPORTPSG PathTerm DARROW PathTerm
+      { fun ctx -> TmExportPsg($1, $2 ctx, $4 ctx) }
 
 AscribeTerm :
     ATerm AS Type

@@ -5,9 +5,12 @@ z = {#"melody"|"135"|"135"|3#};
 
 s1 = MakeSegment (MakePhrase z (MakePhrase (MakeNoteset x y) z))(1,"major");
 s2 = MakeSegment (MakePhrase z (MakePhrase (MakeNoteset x y) z))(3,"minor");
-p1 = MakePassage s1 s1;
-p2 = MakePassage s2 s2;
+p1 = MakePassage s1 s2;
+p2 = MakePassage s2 s1;
 MakePassage p1 p2;
+
+filename = "girigiri_eye";
+ExportPsg p1 => filename;
 
 let x = (MakeNoteset
 			{#"chord"|"135"|"135"|3#} 

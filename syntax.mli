@@ -21,6 +21,7 @@ type ty =
   | TyPhrase of int * int
   | TySegment of int * string
   | TyPassage of int * string * int * string
+  | TyExportPsg
 
 type term =
     TmTrue of info
@@ -51,6 +52,7 @@ type term =
   | TmPhrase of info * term * term
   | TmSegment of info * term * int * string
   | TmPassage of info * term * term
+  | TmExportPsg of info * term * term
 
 type binding =
     NameBind 
