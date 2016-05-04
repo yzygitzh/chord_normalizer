@@ -585,10 +585,13 @@ and printtm_ATerm outer ctx t = match t with
   | TmPhrase(fi,_,_) -> pr "phrase"
   | TmSegment(fi,_,_,_) -> pr "segment"
   | TmPassage(fi,_,_) -> pr "passage"
-  | TmExportPsg(fi,_,filename) ->
-    (match filename with
-        (*TmString(_,s) -> pr (String.concat " " ["passage exported to file";s])*)
-        TmString(_) -> pr (stringOfMusicTerm t true true)
+  | TmExportPsg(fi,_,filename_term) ->
+    (match filename_term with
+        TmString(_,filename) -> 
+          let oc = open_out (String.concat "" ["output/";filename]) in
+            Printf.fprintf oc "%s" (stringOfMusicTerm t true true);
+            close_out oc;
+            pr (String.concat " " ["passage exported to file";filename])
       | _ -> pr "invalid export file name (evaluating)" )
   | t -> pr "("; printtm_Term outer ctx t; pr ")"
 
