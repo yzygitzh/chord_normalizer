@@ -294,6 +294,90 @@ let tmInfo t = match t with
   more details. 
 *)
 
+(* @yzy for chord normalizer *)
+let rec stringOfMusicTerm t isLeftMost isRightMost = match t with
+    TmExportPsg(fi,psg,TmString(_,filename)) -> 
+      String.concat "" ["{\"filename\":\""; filename; "\"";
+                        ",\"passage\":"; stringOfMusicTerm psg true true; "}"]
+  (* export-passage can have only 1 passage so passage don't add comma itself *)
+  | TmPassage(fi,lt,rt) -> 
+      let lstr = ref "" in let rstr = ref "" in (
+        (match lt with
+            TmPassage(_) -> lstr := stringOfMusicTerm lt isLeftMost false;
+          | TmSegment(_) -> 
+              lstr := stringOfMusicTerm lt true true; 
+              if isLeftMost then lstr := String.concat "" ["[";!lstr] else ();
+          | _ -> error fi "exporting error: invalid passage left term");
+        (match rt with
+            TmPassage(_) -> rstr := stringOfMusicTerm rt false isRightMost;
+          | TmSegment(_) -> 
+              rstr := stringOfMusicTerm rt true true; 
+              if isRightMost 
+              then rstr := String.concat "" [String.sub !rstr 0 ((String.length !rstr) - 1);"]"]
+              else ();
+          | _ -> error fi "exporting error: invalid passage right term");
+        String.concat "" [!lstr;!rstr]
+      )
+  (* passage can have multiple segments so segments add comma itself *)
+  | TmSegment(fi,t1,mode_pitch,mode_class) -> 
+      String.concat "" ["{\"pitch\":"; string_of_int mode_pitch;
+                        ",\"class\":\""; mode_class; "\"";
+                        ",\"phrase\":"; stringOfMusicTerm t1 true true; "},"]
+  (* segment can have only 1 phrase so phrase don't add comma itself *)
+  | TmPhrase(fi,lt,rt) -> 
+      let lstr = ref "" in let rstr = ref "" in let noteStr = ref "" in (
+        (match lt with
+            TmPhrase(_) -> lstr := stringOfMusicTerm lt isLeftMost false;
+          | TmNoteset(_) -> 
+              lstr := stringOfMusicTerm lt true true; 
+              if isLeftMost then lstr := String.concat "" ["[";!lstr] else ();
+          | TmNote(_) -> 
+              noteStr := stringOfMusicTerm lt true true;
+              lstr := String.concat "" ["[";String.sub !noteStr 0 ((String.length !noteStr) - 1);"],"]; 
+              if isLeftMost then lstr := String.concat "" ["[";!lstr] else ();
+          | _ -> error fi "exporting error: invalid phrase left term");
+        (match rt with
+            TmPhrase(_) -> rstr := stringOfMusicTerm rt false isRightMost;
+          | TmNoteset(_) -> 
+              rstr := stringOfMusicTerm rt true true; 
+              if isRightMost 
+              then rstr := String.concat "" [String.sub !rstr 0 ((String.length !rstr) - 1);"]"]
+              else ();
+          | TmNote(_) -> 
+              noteStr := stringOfMusicTerm lt true true;
+              rstr := String.concat "" ["[";String.sub !noteStr 0 ((String.length !noteStr) - 1);"],"]; 
+              if isRightMost 
+              then rstr := String.concat "" [String.sub !rstr 0 ((String.length !rstr) - 1);"]"]
+              else ();
+          | _ -> error fi "exporting error: invalid phrase right term");
+        String.concat "" [!lstr;!rstr]
+      )
+  (* phrase can have multiple notesets so noteset add comma itself *)
+  | TmNoteset(fi,lt,rt) -> 
+      let lstr = ref "" in let rstr = ref "" in (
+        (match lt with
+            TmNoteset(_) -> lstr := stringOfMusicTerm lt isLeftMost false;
+          | TmNote(_) -> 
+              lstr := stringOfMusicTerm lt true true; 
+              if isLeftMost then lstr := String.concat "" ["[";!lstr] else ();
+          | _ -> error fi "exporting error: invalid noteset left term");
+        (match rt with
+            TmNoteset(_) -> rstr := stringOfMusicTerm rt false isRightMost;
+          | TmNote(_) -> 
+              rstr := stringOfMusicTerm rt true true; 
+              if isRightMost 
+              then rstr := String.concat "" [String.sub !rstr 0 ((String.length !rstr) - 1);"],"]
+              else ();
+          | _ -> error fi "exporting error: invalid noteset right term");
+        String.concat "" [!lstr;!rstr]
+      )
+  | TmNote(fi,ty,seq,height,len) -> 
+      String.concat "" ["{\"type\":\""; ty; "\"";
+                        ",\"sequence\":\""; seq; "\"";
+                        ",\"height\":\""; height; "\"";
+                        ",\"length\":"; string_of_int len; "},"]
+  | _ -> error dummyinfo "exporting error: invalid music element"
+
 let obox0() = open_hvbox 0
 let obox() = open_hvbox 2
 let cbox() = close_box()
@@ -503,7 +587,8 @@ and printtm_ATerm outer ctx t = match t with
   | TmPassage(fi,_,_) -> pr "passage"
   | TmExportPsg(fi,_,filename) ->
     (match filename with
-        TmString(_,s) -> pr (String.concat " " ["passage exported to file";s])
+        (*TmString(_,s) -> pr (String.concat " " ["passage exported to file";s])*)
+        TmString(_) -> pr (stringOfMusicTerm t true true)
       | _ -> pr "invalid export file name (evaluating)" )
   | t -> pr "("; printtm_Term outer ctx t; pr ")"
 
@@ -515,73 +600,3 @@ let prbinding ctx b = match b with
   | VarBind(tyT) -> pr ": "; printty ctx tyT
   | TmAbbBind(t,tyT) -> pr "= "; printtm ctx t
   | TyAbbBind(tyT) -> pr "= "; printty ctx tyT 
-
-(* @yzy for chord normalizer *)
-let rec stringOfMusicTerm t isLeftMost isRightMost = match t with
-    TmExportPsg(fi,psg,filename) -> String.concat ""
-      ["[";stringOfMusicTerm psg true true;"]"]
-  | TmPassage(fi,lt,rt) ->
-      let lstr = ref "" in let rstr = ref "" in (
-        (match lt with
-            TmPassage(_) -> lstr := stringOfMusicTerm lt isLeftMost false;
-          | TmSegment(_) -> 
-              lstr := stringOfMusicTerm lt true true; 
-              if isLeftMost then lstr := String.concat "" ["[";!lstr] else ();
-          | _ -> error fi "exporting error: invalid passage left term");
-        (match rt with
-            TmPassage(_) -> rstr := stringOfMusicTerm rt false isRightMost;
-          | TmSegment(_) -> 
-              rstr := stringOfMusicTerm rt true true; 
-              if isRightMost then rstr := String.concat "" [!rstr;"]"] else ();
-          | _ -> error fi "exporting error: invalid passage right term");
-        String.concat "" [!lstr;!rstr]
-      )
-  | TmSegment(fi,t1,mode_pitch,mode_class) -> 
-      String.concat "" ["{\"pitch\":"; 
-                        string_of_int mode_pitch; 
-                        ",\"class\":"; 
-                        stringOfMusicTerm t1 true true; "}"]
-  | TmPhrase(fi,lt,rt) -> 
-      let lstr = ref "" in let rstr = ref "" in (
-        (match lt with
-            TmPhrase(_) -> lstr := stringOfMusicTerm lt isLeftMost false;
-          | TmNoteset(_) -> 
-              lstr := stringOfMusicTerm lt true true; 
-              if isLeftMost then lstr := String.concat "" ["[";!lstr] else ();
-          | TmNote(_) -> 
-              lstr := String.concat "" ["[";stringOfMusicTerm lt true true;"]"]; 
-              if isLeftMost then lstr := String.concat "" ["[";!lstr] else ();
-          | _ -> error fi "exporting error: invalid phrase left term");
-        (match rt with
-            TmPhrase(_) -> rstr := stringOfMusicTerm rt false isRightMost;
-          | TmNoteset(_) -> 
-              rstr := stringOfMusicTerm rt true true; 
-              if isRightMost then rstr := String.concat "" [!rstr;"]"] else ();
-          | TmNote(_) -> 
-              rstr := String.concat "" ["[";stringOfMusicTerm rt true true;"]"]; 
-              if isRightMost then rstr := String.concat "" [!rstr;"]"] else ();
-          | _ -> error fi "exporting error: invalid phrase right term");
-        String.concat "" [!lstr;!rstr]
-      )
-  | TmNoteset(fi,lt,rt) -> 
-      let lstr = ref "" in let rstr = ref "" in (
-        (match lt with
-            TmNoteset(_) -> lstr := stringOfMusicTerm lt isLeftMost false;
-          | TmNote(_) -> 
-              lstr := stringOfMusicTerm lt true true; 
-              if isLeftMost then lstr := String.concat "" ["[";!lstr] else ();
-          | _ -> error fi "exporting error: invalid noteset left term");
-        (match rt with
-            TmNoteset(_) -> rstr := stringOfMusicTerm rt false isRightMost;
-          | TmNote(_) -> 
-              rstr := stringOfMusicTerm rt true true; 
-              if isRightMost then rstr := String.concat "" [!rstr;"]"] else ();
-          | _ -> error fi "exporting error: invalid noteset right term");
-        String.concat "" [!lstr;!rstr]
-      )
-  | TmNote(fi,ty,seq,height,len) -> 
-      String.concat "" ["{\"type\":"; ty;
-                        ",\"sequence\":"; seq;
-                        ",\"height\":"; height;
-                        ",\"length\":"; string_of_int len; "}"]
-  | _ -> error dummyinfo "exporting error: invalid music element"

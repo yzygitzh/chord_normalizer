@@ -24,14 +24,11 @@ let rec isval ctx t = match t with
   | TmRecord(_,fields) -> List.for_all (fun (l,ti) -> isval ctx ti) fields
   (* @yzy for chord normalizer *)
   | TmNote(_,_,_,_,_) -> true
-  | TmNoteset(_,_,_) -> true
-  | TmPhrase(_,_,_) -> true
-  | TmSegment(_,_,_,_) -> true
-  | TmPassage(_,_,_) -> true
-  | TmExportPsg(fi,psg,filename) ->
-    (match filename with 
-        TmString _ -> true
-      | _ -> false)
+  | TmNoteset(_,t1,t2) -> (isval ctx t1) && (isval ctx t2)
+  | TmPhrase(_,t1,t2) -> (isval ctx t1) && (isval ctx t2)
+  | TmSegment(_,t1,_,_) -> isval ctx t1
+  | TmPassage(_,t1,t2) -> (isval ctx t1) && (isval ctx t2)
+  | TmExportPsg(fi,psg,filename) -> (isval ctx psg) && (isval ctx filename)
   | _ -> false
 
 let rec eval1 ctx t = match t with
@@ -125,9 +122,34 @@ let rec eval1 ctx t = match t with
       let t1' = eval1 ctx t1 in
       TmIsZero(fi, t1')
   (* @yzy for chord normalizer *)
-  | TmExportPsg(fi,psg,filename) when (not (isval ctx filename)) ->
-      let filename' = eval1 ctx filename in
-      TmExportPsg(fi,psg,filename')
+  | TmNoteset(fi,t1,t2) -> 
+      if (not (isval ctx t1))
+      then let t1' = eval1 ctx t1 in TmNoteset(fi,t1',t2)
+      else if (not (isval ctx t2))
+      then let t2' = eval1 ctx t2 in TmNoteset(fi,t1,t2')
+      else raise NoRuleApplies
+  | TmPhrase(fi,t1,t2) -> 
+      if (not (isval ctx t1))
+      then let t1' = eval1 ctx t1 in TmPhrase(fi,t1',t2)
+      else if (not (isval ctx t2))
+      then let t2' = eval1 ctx t2 in TmPhrase(fi,t1,t2')
+      else raise NoRuleApplies
+  | TmSegment(fi,t1,mode_pitch,mode_class) -> 
+      if (not (isval ctx t1))
+      then let t1' = eval1 ctx t1 in TmSegment(fi,t1',mode_pitch,mode_class)
+      else raise NoRuleApplies
+  | TmPassage(fi,t1,t2) -> 
+      if (not (isval ctx t1))
+      then let t1' = eval1 ctx t1 in TmPassage(fi,t1',t2)
+      else if (not (isval ctx t2))
+      then let t2' = eval1 ctx t2 in TmPassage(fi,t1,t2')
+      else raise NoRuleApplies
+  | TmExportPsg(fi,psg,filename)  ->
+      if (not (isval ctx psg))
+      then let psg' = eval1 ctx psg in TmExportPsg(fi,psg',filename)
+      else if (not (isval ctx filename))
+      then let filename' = eval1 ctx filename in TmExportPsg(fi,psg,filename')
+      else raise NoRuleApplies
   | _ -> 
       raise NoRuleApplies
 
