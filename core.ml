@@ -380,21 +380,13 @@ let rec typeof ctx t =
       let typet2 = typeof ctx t2 in 
       let rank1 = ref 0 in let rank2 = ref 0 in let rank3 = ref 0 in let rank4 = ref 0 in(
         (match typet1 with
-            TyNote(nr1) | TyNoteset(nr1) -> (
-              rank1 := nr1; rank2 := nr1;
-              (match typet2 with
-                  TyNote(nr2) | TyNoteset(nr2) -> rank3 := nr2; rank4 := nr2;
-                | TyPhrase(pr21,pr22) -> rank3 := pr21; rank4 := pr22;
-                | _ -> error fi "invalid phrase constructor #2")
-            )
-          | TyPhrase(pr11,pr12) -> (
-              rank1 := pr11; rank2 := pr12;
-              (match typet2 with
-                  TyNote(nr2) | TyNoteset(nr2) -> rank3 := nr2; rank4 := nr2;
-                | TyPhrase(pr21,pr22) -> rank3 := pr21; rank4 := pr22;
-                | _ -> error fi "invalid phrase constructor #2")
-            )
+            TyNote(nr1) | TyNoteset(nr1) -> rank1 := nr1; rank2 := nr1;
+          | TyPhrase(pr11,pr12) -> rank1 := pr11; rank2 := pr12;
           | _ -> error fi "invalid phrase constructor #1");
+        (match typet2 with
+            TyNote(nr2) | TyNoteset(nr2) -> rank3 := nr2; rank4 := nr2;
+          | TyPhrase(pr21,pr22) -> rank3 := pr21; rank4 := pr22;
+          | _ -> error fi "invalid phrase constructor #2");
         if ((!rank2 == 1 && !rank3 == 4) || 
             (!rank2 == 1 && !rank3 == 5) || 
             (!rank2 == 4 && !rank3 == 1) ||
@@ -422,31 +414,17 @@ let rec typeof ctx t =
       let pitch1 = ref 0 in let pitch2 = ref 0 in let pitch3 = ref 0 in let pitch4 = ref 0 in 
       let class1 = ref "" in let class2 = ref "" in let class3 = ref "" in let class4 = ref "" in(
         (match typet1 with 
-          TySegment(sp1,sc1) -> (
-            pitch1 := sp1; class1 := sc1;
-            pitch2 := sp1; class2 := sc1;
-            (match typet2 with
-                TySegment(sp2,sc2) -> 
-                  pitch3 := sp2; class3 := sc2; 
-                  pitch4 := sp2; class4 := sc2;
-              | TyPassage(pp21,pc21,pp22,pc22) -> 
-                  pitch3 := pp21; class3 := pc21; 
-                  pitch4 := pp22; class4 := pc22;
-              | _ -> error fi "invalid passage constructor #2")
-          )
-        | TyPassage(pp11,pc11,pp12,pc12) -> (
-            pitch1 := pp11; class1 := pc11;
-            pitch2 := pp12; class2 := pc12;
-            (match typet2 with
-                TySegment(sp2,sc2) -> 
-                  pitch3 := sp2; class3 := sc2; 
-                  pitch4 := sp2; class4 := sc2;
-              | TyPassage(pp21,pc21,pp22,pc22) -> 
-                  pitch3 := pp21; class3 := pc21; 
-                  pitch4 := pp22; class4 := pc22;
-              | _ -> error fi "invalid passage constructor #2")
-          )
-        | _ -> error fi "invalid passage constructor #1");
+            TySegment(sp1,sc1) -> 
+              pitch1 := sp1; class1 := sc1; pitch2 := sp1; class2 := sc1;
+          | TyPassage(pp11,pc11,pp12,pc12) ->
+              pitch1 := pp11; class1 := pc11; pitch2 := pp12; class2 := pc12;
+          | _ -> error fi "invalid passage constructor #1");
+        (match typet2 with
+            TySegment(sp2,sc2) -> 
+              pitch3 := sp2; class3 := sc2; pitch4 := sp2; class4 := sc2;
+          | TyPassage(pp21,pc21,pp22,pc22) -> 
+              pitch3 := pp21; class3 := pc21; pitch4 := pp22; class4 := pc22;
+          | _ -> error fi "invalid passage constructor #2");
         let mode_class_same = (0 == String.compare !class2 !class3) in 
         let class1_is_major = (0 == String.compare !class2 "major") in
         let class2_is_minor = (0 == String.compare !class3 "minor") in
