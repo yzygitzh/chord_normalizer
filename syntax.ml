@@ -344,7 +344,7 @@ let rec stringOfMusicTerm t isLeftMost isRightMost = match t with
               then rstr := String.concat "" [String.sub !rstr 0 ((String.length !rstr) - 1);"]"]
               else ();
           | TmNote(_) -> 
-              noteStr := stringOfMusicTerm lt true true;
+              noteStr := stringOfMusicTerm rt true true;
               rstr := String.concat "" ["[";String.sub !noteStr 0 ((String.length !noteStr) - 1);"],"]; 
               if isRightMost 
               then rstr := String.concat "" [String.sub !rstr 0 ((String.length !rstr) - 1);"]"]
