@@ -89,6 +89,8 @@ val printtm: context -> term -> unit
 val printtm_ATerm: bool -> context -> term -> unit
 val printty : context -> ty -> unit
 val prbinding : context -> binding -> unit
+(* @yzy for chord normalizer *)
+val stringOfMusicTerm: term -> bool -> bool -> string
 
 (* Misc *)
 val tmInfo: term -> info
