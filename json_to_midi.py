@@ -7,7 +7,7 @@ output_dir = os.path.abspath("midi_output/")
 midi_velocity = 90
 
 midi_bpm = 120
-tbp = 240
+tbp = midi_bpm
 
 mode_sequence = {"major": [0, 0, 2, 4, 5, 7, 9, 11, 12], \
                  "minor": [0, 0, 2, 3, 5, 7, 8, 10, 12]}
@@ -67,7 +67,7 @@ for input_file_name in root_filenames:
     midi_track = midi.Track()
     midi_pattern.append(midi_track)
 
-    midi_track.append(midi.SetTempoEvent(tick=0,bpm=120))
+    midi_track.append(midi.SetTempoEvent(tick=0,bpm=midi_bpm))
 
     phrase_list = input_json["passage"]
     curr_note_pos = 0
